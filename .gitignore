@@ -1,0 +1,44 @@
+# ─── Build ───────────────────────────────
+build/
+*.dll
+*.so
+*.dylib
+*.lib
+*.obj
+*.o
+*.exp
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# ─── Python ──────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+*.egg
+
+# ─── SLM Models ──────────────────────────
+models/*.slm
+models/*.uni
+models/*.bi
+models/*.tri
+models/*.meta
+
+# ─── IDE / Editor ────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vs/
+
+# ─── OS ──────────────────────────────────
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ─── Test artifacts ──────────────────────
+test_*.slm
