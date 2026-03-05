@@ -1,37 +1,73 @@
 """
 SLM Config — Manages persistent configuration and state.
 
-Stores: API keys, model paths, default settings.
-File:   slm_config.json  (in project root)
+Priority order for reading values:
+  1. .env file (GOOGLE_API_KEY, GEMINI_MODEL, ...)
+  2. slm_config.json
+  3. Built-in defaults
+
+File: slm_config.json (in project root, git-ignored)
+      .env            (in project root, git-ignored)
 """
 
 import os
 import json
 from typing import Any, Optional
 
-# Location of config file (always next to slm_cli.py)
-_CONFIG_FILE = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "..", "..", "slm_config.json"
+# Root of the project (two levels up from this file)
+_ROOT = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 )
-_CONFIG_FILE = os.path.normpath(_CONFIG_FILE)
+_CONFIG_FILE = os.path.join(_ROOT, "slm_config.json")
+_ENV_FILE    = os.path.join(_ROOT, ".env")
 
 _DEFAULTS = {
-    "version": "1.0.0",
-    "gemini_api_key": "",
-    "gemini_model": "gemini-1.5-flash",
+    "version":            "1.0.0",
+    "gemini_api_key":     "",
+    "gemini_model":       "gemini-2.0-flash",
     "default_model_path": "models/default.slm",
-    "default_temp": 0.7,
-    "default_length": 50,
-    "auto_load": True,
-    "corpus_dir": "corpus",
-    "last_model": "",
+    "default_temp":       0.7,
+    "default_length":     50,
+    "auto_load":          True,
+    "corpus_dir":         "corpus",
+    "last_model":         "",
+}
+
+# Mapping from .env variable names → config keys
+_ENV_MAP = {
+    "GOOGLE_API_KEY":  "gemini_api_key",
+    "GEMINI_API_KEY":  "gemini_api_key",
+    "GEMINI_MODEL":    "gemini_model",
 }
 
 
+def _load_env() -> dict:
+    """Read key=value pairs from .env file (no external deps)."""
+    result = {}
+    if not os.path.exists(_ENV_FILE):
+        return result
+    try:
+        with open(_ENV_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, _, val = line.partition("=")
+                key = key.strip()
+                val = val.strip().strip('"').strip("'")
+                env_key = _ENV_MAP.get(key)
+                if env_key:
+                    result[env_key] = val
+    except IOError:
+        pass
+    return result
+
+
 def load() -> dict:
-    """Load config from file, returning defaults for missing keys."""
+    """Load config: defaults → slm_config.json → .env (highest priority)."""
     config = dict(_DEFAULTS)
+
+    # Layer 1: slm_config.json
     if os.path.exists(_CONFIG_FILE):
         try:
             with open(_CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -39,11 +75,14 @@ def load() -> dict:
             config.update(stored)
         except (json.JSONDecodeError, IOError):
             pass
+
+    # Layer 2: .env overrides (highest priority)
+    config.update(_load_env())
     return config
 
 
 def save(config: dict) -> bool:
-    """Save config to file."""
+    """Save config to slm_config.json (excludes .env values)."""
     try:
         with open(_CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=2)
@@ -53,28 +92,31 @@ def save(config: dict) -> bool:
 
 
 def get(key: str, default: Any = None) -> Any:
-    """Get a single config value."""
+    """Get a single config value (respects .env priority)."""
     return load().get(key, default)
 
 
 def set_value(key: str, value: Any) -> bool:
-    """Set a single config value and persist."""
+    """Persist a value to slm_config.json."""
     config = load()
     config[key] = value
     return save(config)
 
 
 def get_api_key() -> Optional[str]:
-    """Return Gemini API key if configured, else None."""
+    """Return Gemini API key — reads .env first, then slm_config.json."""
     key = get("gemini_api_key", "")
-    return key if key else None
+    return key.strip() if key and key.strip() else None
 
 
 def reset() -> bool:
-    """Reset config to defaults."""
+    """Reset slm_config.json to defaults (does not touch .env)."""
     return save(dict(_DEFAULTS))
 
 
 def path() -> str:
-    """Return the config file path."""
     return _CONFIG_FILE
+
+
+def env_path() -> str:
+    return _ENV_FILE
