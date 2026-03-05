@@ -523,7 +523,9 @@ def cmd_corpus(engine: SLMEngine, trainer: SLMTrainer, args: List[str]):
         api_key = _cfg.get_api_key()
         if not api_key:
             _err("Gemini API key not set")
-            _tip("config set gemini_api_key YOUR_API_KEY")
+            print(f"  {C.GRAY}Add it to your .env file:{C.RESET}")
+            print(f"  {C.CYAN}  GOOGLE_API_KEY=your_key_here{C.RESET}")
+            print(f"  {C.GRAY}  File: {_cfg.env_path()}{C.RESET}")
             print(f"  {C.GRAY}Get a free key at: https://ai.google.dev{C.RESET}")
             return
 
@@ -542,17 +544,20 @@ def cmd_corpus(engine: SLMEngine, trainer: SLMTrainer, args: List[str]):
         print(f"  {C.GRAY}Generating text via Gemini API...{C.RESET}")
 
         start = time.time()
-        filepath = gemini_helper.expand_corpus(
+        filepath, error = gemini_helper.expand_corpus(
             api_key=api_key,
             topic=topic,
             output_dir=corpus_dir,
             num_sentences=num_sentences,
-            model_name=_cfg.get("gemini_model", "gemini-1.5-flash"),
+            model_name=_cfg.get("gemini_model", "gemini-2.0-flash"),
         )
         elapsed = time.time() - start
 
         if not filepath:
-            _err("Gemini generation failed — check your API key and internet connection")
+            _err(f"Gemini error: {error}")
+            if "quota" in (error or "").lower() or "429" in (error or ""):
+                print(f"  {C.YELLOW}→ API rate limit hit. Wait a minute and try again.{C.RESET}")
+                print(f"  {C.GRAY}  Or check usage at: https://ai.google.dev/gemini-api/docs/rate-limits{C.RESET}")
             return
 
         size = os.path.getsize(filepath)
