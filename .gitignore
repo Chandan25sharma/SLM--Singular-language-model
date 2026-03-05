@@ -14,6 +14,7 @@ Makefile
 
 # ─── Config (contains API keys) ──────────
 slm_config.json
+.env
 
 # ─── Python ──────────────────────────────
 __pycache__/

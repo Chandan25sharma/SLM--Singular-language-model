@@ -23,7 +23,6 @@ _ENV_FILE    = os.path.join(_ROOT, ".env")
 
 _DEFAULTS = {
     "version":            "1.0.0",
-    "gemini_api_key":     "",
     "gemini_model":       "gemini-2.0-flash",
     "default_model_path": "models/default.slm",
     "default_temp":       0.7,
@@ -32,6 +31,9 @@ _DEFAULTS = {
     "corpus_dir":         "corpus",
     "last_model":         "",
 }
+
+# Keys that must ONLY live in .env — never written to JSON
+_ENV_ONLY_KEYS = {"gemini_api_key"}
 
 # Mapping from .env variable names → config keys
 _ENV_MAP = {
@@ -97,7 +99,12 @@ def get(key: str, default: Any = None) -> Any:
 
 
 def set_value(key: str, value: Any) -> bool:
-    """Persist a value to slm_config.json."""
+    """Persist a value to slm_config.json. API keys are blocked — use .env instead."""
+    if key in _ENV_ONLY_KEYS:
+        raise ValueError(
+            f"'{key}' is secret and must be stored in .env only, not in slm_config.json.\n"
+            f"Edit your .env file and set: GOOGLE_API_KEY=your_key_here"
+        )
     config = load()
     config[key] = value
     return save(config)

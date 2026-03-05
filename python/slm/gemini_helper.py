@@ -36,15 +36,15 @@ def generate_corpus(
     api_key: str,
     topic: str,
     num_sentences: int = 100,
-    model_name: str = "gemini-1.5-flash",
-) -> Optional[str]:
+    model_name: str = "gemini-2.0-flash",
+) -> tuple:
     """
     Generate training text on a given topic using Gemini.
-    Returns the generated text, or None on failure.
+    Returns (text, None) on success, or (None, error_str) on failure.
     """
     genai = _import_gemini()
     if not genai:
-        return None
+        return None, "google-generativeai SDK not installed. Run: pip install google-generativeai"
 
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel(model_name)
@@ -59,15 +59,14 @@ Requirements:
 - Do NOT use bullet points, headers, or special characters
 - Write paragraph-style flowing text, not a list
 - Cover diverse subtopics within "{topic}"
-- Total output should be approximately {num_sentences * 15} words
 
 Output only the text, nothing else."""
 
     try:
         response = model.generate_content(prompt)
-        return response.text.strip() if response.text else None
+        return (response.text.strip(), None) if response.text else (None, "Empty response from Gemini")
     except Exception as e:
-        return None
+        return None, str(e)
 
 
 def expand_corpus(
@@ -75,18 +74,17 @@ def expand_corpus(
     topic: str,
     output_dir: str = "corpus",
     num_sentences: int = 150,
-    model_name: str = "gemini-1.5-flash",
-) -> Optional[str]:
+    model_name: str = "gemini-2.0-flash",
+) -> tuple:
     """
     Generate corpus text and save it to a file in output_dir.
-    Returns the path to the saved file, or None on failure.
+    Returns (filepath, None) on success, or (None, error_str) on failure.
     """
-    text = generate_corpus(api_key, topic, num_sentences, model_name)
+    text, error = generate_corpus(api_key, topic, num_sentences, model_name)
     if not text:
-        return None
+        return None, error
 
     os.makedirs(output_dir, exist_ok=True)
-    # Sanitize topic name for file
     safe_name = "".join(c if c.isalnum() or c in "-_ " else "_" for c in topic)
     safe_name = safe_name.strip().replace(" ", "_").lower()
     filepath = os.path.join(output_dir, f"{safe_name}.txt")
@@ -94,7 +92,7 @@ def expand_corpus(
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(text)
 
-    return filepath
+    return filepath, None
 
 
 def install_sdk() -> bool:
