@@ -27,4 +27,4 @@ private:
         double temperature) const;
 };
 
-} // namespace slmsdvdfcb
+} // namespace slm
