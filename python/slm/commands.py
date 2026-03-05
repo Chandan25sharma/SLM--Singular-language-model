@@ -9,6 +9,7 @@ from typing import List
 from .engine import SLMEngine
 from .trainer import SLMTrainer
 from .bridge import get_engine_type
+from . import config as _cfg
 from . import __version__
 
 
@@ -438,6 +439,133 @@ def cmd_version(engine: SLMEngine, trainer: SLMTrainer, args: List[str]):
     print(f"  {C.GRAY}Offline · Frequency-based · No internet{C.RESET}\n")
 
 
+@command("config", "config <get|set|show|reset> [key] [value]", "Manage SLM configuration and API keys")
+def cmd_config(engine: SLMEngine, trainer: SLMTrainer, args: List[str]):
+    if not args or args[0] == "show":
+        cfg = _cfg.load()
+        print(f"\n  {C.CYAN}{'━' * 42}{C.RESET}")
+        print(f"  {C.CYAN}  SLM Config  {C.GRAY}({_cfg.path()}){C.RESET}")
+        print(f"  {C.CYAN}{'━' * 42}{C.RESET}\n")
+        for k, v in cfg.items():
+            display = "****" + str(v)[-4:] if k == "gemini_api_key" and v else (str(v) or C.GRAY + "(not set)" + C.RESET)
+            print(f"  {C.WHITE}{k:<22}{C.RESET}  {C.CYAN}{display}{C.RESET}")
+        print()
+        return
+
+    sub = args[0].lower()
+
+    if sub == "set":
+        if len(args) < 3:
+            _err("Usage: config set <key> <value>")
+            _tip("config set gemini_api_key YOUR_KEY_HERE")
+            return
+        key, val = args[1], " ".join(args[2:])
+        if key not in _cfg._DEFAULTS:
+            _err(f"Unknown key: {key}")
+            print(f"  {C.GRAY}Valid keys: {', '.join(_cfg._DEFAULTS.keys())}{C.RESET}")
+            return
+        _cfg.set_value(key, val)
+        _ok(f"Set {key} = {'****' + val[-4:] if 'key' in key and val else val}")
+
+    elif sub == "get":
+        if len(args) < 2:
+            _err("Usage: config get <key>")
+            return
+        val = _cfg.get(args[1])
+        display = "****" + str(val)[-4:] if "key" in args[1] and val else str(val)
+        print(f"  {C.WHITE}{args[1]}:{C.RESET} {C.CYAN}{display}{C.RESET}")
+
+    elif sub == "reset":
+        _cfg.reset()
+        _ok("Config reset to defaults")
+
+    else:
+        _err(f"Unknown sub-command: {sub}")
+        _tip("config show  │  config set <key> <value>  │  config reset")
+
+
+@command("corpus", "corpus <list|expand> [--topic T] [--sentences N]", "Manage and expand training corpus")
+def cmd_corpus(engine: SLMEngine, trainer: SLMTrainer, args: List[str]):
+    corpus_dir = _cfg.get("corpus_dir", "corpus")
+
+    if not args or args[0] == "list":
+        # List corpus files
+        if not os.path.isdir(corpus_dir):
+            _tip(f"Corpus directory not found: {corpus_dir}")
+            return
+        files = [f for f in sorted(os.listdir(corpus_dir)) if f.endswith(".txt")]
+        if not files:
+            _tip("No .txt files in corpus/ yet.")
+            return
+        print(f"\n  {C.CYAN}Corpus files in {corpus_dir}/:{C.RESET}\n")
+        for f in files:
+            size = os.path.getsize(os.path.join(corpus_dir, f))
+            print(f"  {C.WHITE}  {f:<30}{C.RESET}  {C.GRAY}{size:,} bytes{C.RESET}")
+        print()
+        return
+
+    if args[0] == "expand":
+        # Parse flags
+        _, flags = _parse_flags(
+            args[1:],
+            ("--topic", "", str),
+            ("--sentences", 150, int),
+        )
+        topic = flags["--topic"]
+        num_sentences = flags["--sentences"]
+
+        if not topic:
+            _err("Topic required")
+            _tip('corpus expand --topic "machine learning" --sentences 200')
+            _tip('corpus expand --topic "history of science"')
+            return
+
+        api_key = _cfg.get_api_key()
+        if not api_key:
+            _err("Gemini API key not set")
+            _tip("config set gemini_api_key YOUR_API_KEY")
+            print(f"  {C.GRAY}Get a free key at: https://ai.google.dev{C.RESET}")
+            return
+
+        from . import gemini_helper
+        if not gemini_helper.is_available():
+            print(f"  {C.YELLOW}Installing google-generativeai SDK...{C.RESET}")
+            if not gemini_helper.install_sdk():
+                _err("Failed to install SDK. Run: pip install google-generativeai")
+                return
+            _ok("SDK installed")
+
+        print(f"\n  {C.CYAN}{'━' * 50}{C.RESET}")
+        print(f"  {C.CYAN}  Gemini Corpus Expansion{C.RESET}")
+        print(f"  {C.GRAY}  Topic: {topic}  |  Sentences: {num_sentences}{C.RESET}")
+        print(f"  {C.CYAN}{'━' * 50}{C.RESET}\n")
+        print(f"  {C.GRAY}Generating text via Gemini API...{C.RESET}")
+
+        start = time.time()
+        filepath = gemini_helper.expand_corpus(
+            api_key=api_key,
+            topic=topic,
+            output_dir=corpus_dir,
+            num_sentences=num_sentences,
+            model_name=_cfg.get("gemini_model", "gemini-1.5-flash"),
+        )
+        elapsed = time.time() - start
+
+        if not filepath:
+            _err("Gemini generation failed — check your API key and internet connection")
+            return
+
+        size = os.path.getsize(filepath)
+        _ok(f"Generated corpus saved → {filepath}  ({size:,} bytes, {elapsed:.1f}s)")
+        print(f"\n  {C.GRAY}Now train SLM on it:{C.RESET}")
+        print(f"  {C.CYAN}  → train {filepath}{C.RESET}\n")
+
+    else:
+        _err(f"Unknown sub-command: {args[0]}")
+        _tip("corpus list")
+        _tip('corpus expand --topic "your topic" --sentences 200')
+
+
 def execute_command(
     command_name: str,
     engine: SLMEngine,
@@ -452,7 +580,6 @@ def execute_command(
             print(f"\n  {C.YELLOW}Interrupted.{C.RESET}")
     else:
         print(f"\n  {C.RED}Unknown command: '{command_name}'{C.RESET}")
-        # Fuzzy suggestion
         candidates = [k for k in COMMANDS if k.startswith(command_name[:2])]
         if candidates:
             print(f"  {C.GRAY}Did you mean: {', '.join(candidates[:3])}?{C.RESET}")
