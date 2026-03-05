@@ -12,6 +12,9 @@ CMakeFiles/
 cmake_install.cmake
 Makefile
 
+# ─── Config (contains API keys) ──────────
+slm_config.json
+
 # ─── Python ──────────────────────────────
 __pycache__/
 *.pyc
