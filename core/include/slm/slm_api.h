@@ -36,6 +36,7 @@ SLM_API const char* slm_predict_next(slm_handle handle, const char* context, int
 // Info
 SLM_API int slm_get_vocab_size(slm_handle handle);
 SLM_API int slm_get_total_tokens(slm_handle handle);
+SLM_API const char* slm_get_top_vocab(slm_handle handle, int n);
 
 // Memory
 SLM_API void slm_free_string(const char* str);
