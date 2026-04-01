@@ -393,6 +393,7 @@ chmod +x build.sh && ./build.sh
 **SLM v1.0.0** — Singular Language Model  
 
 Co-authored-by: Chandan Sharma <mrchandansharma25@gmail.com>
+Co-authored-by: Chandan Sharma <mrchandansharma26@gmail.com>
 
 
 Offline · Frequency-Based · Free · Open
