@@ -22,8 +22,7 @@ That's it. No magic. No black box. Pure statistics.
 
 ---
 
-## How It Works and who we can use it 
-
+## How It Works and who we can use it so thart  main of hte 
 ### The Core Idea: N-Gram Frequency Analysis
 
 SLM learns by counting how often word sequences appear in training text.
