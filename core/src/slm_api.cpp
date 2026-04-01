@@ -122,6 +122,24 @@ int slm_get_total_tokens(slm_handle handle) {
     return static_cast<int>(ctx->model.total_tokens_trained());
 }
 
+const char* slm_get_top_vocab(slm_handle handle, int n) {
+    if (!handle) return alloc_string("[]");
+
+    auto* ctx = static_cast<SLMContext*>(handle);
+    auto top = ctx->model.top_vocab(n > 0 ? static_cast<size_t>(n) : 20);
+
+    // Build JSON array
+    std::string json = "[";
+    for (size_t i = 0; i < top.size(); ++i) {
+        if (i > 0) json += ",";
+        json += "{\"word\":\"" + top[i].first + "\",\"count\":"
+             + std::to_string(top[i].second) + "}";
+    }
+    json += "]";
+
+    return alloc_string(json);
+}
+
 void slm_free_string(const char* str) {
     std::free(const_cast<char*>(str));
 }

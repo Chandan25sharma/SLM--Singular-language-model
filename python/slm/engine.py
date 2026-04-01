@@ -288,10 +288,9 @@ class Generator:
         return result
 
 
-class SLMEngine:
+class PythonEngine:
     """
-    Main SLM Engine — wraps the n-gram model, tokenizer, and generator.
-    This is the pure-Python implementation (no C++ dependency).
+    Pure-Python SLM Engine Implementation.
     """
 
     def __init__(self):
@@ -299,7 +298,6 @@ class SLMEngine:
         self._trained = False
 
     def train_text(self, text: str) -> int:
-        """Train on raw text. Returns number of tokens processed."""
         tokens = Tokenizer.tokenize(text)
         if not tokens:
             return 0
@@ -308,13 +306,11 @@ class SLMEngine:
         return len(tokens)
 
     def train_file(self, filepath: str) -> int:
-        """Train on a text file. Returns number of tokens processed."""
         with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
             text = f.read()
         return self.train_text(text)
 
     def train_directory(self, dirpath: str) -> int:
-        """Train on all .txt files in a directory. Returns total tokens."""
         total = 0
         for filename in sorted(os.listdir(dirpath)):
             if filename.endswith(".txt"):
@@ -326,7 +322,6 @@ class SLMEngine:
     def generate(
         self, prompt: str, max_length: int = 50, temperature: float = 0.7
     ) -> str:
-        """Generate text from a prompt."""
         tokens = Tokenizer.tokenize(prompt)
         gen = Generator(self.model)
         result = gen.generate(tokens, max_length, temperature)
@@ -335,7 +330,6 @@ class SLMEngine:
     def predict_next(
         self, context: str, num_candidates: int = 5
     ) -> List[Tuple[str, float]]:
-        """Get next-word predictions for a context."""
         tokens = Tokenizer.tokenize(context)
         return self.model.predict_next(tokens, num_candidates)
 
@@ -364,3 +358,67 @@ class SLMEngine:
     @property
     def is_trained(self) -> bool:
         return self._trained
+
+
+class SLMEngine:
+    """
+    Smart SLM Engine that delegates to C++ Native or Pure Python.
+    """
+
+    def __init__(self):
+        from .bridge import is_native_available, NativeEngine
+        if is_native_available():
+            self._backend = NativeEngine()
+        else:
+            self._backend = PythonEngine()
+
+    def train_text(self, text: str) -> int:
+        return self._backend.train_text(text)
+
+    def train_file(self, filepath: str) -> int:
+        return self._backend.train_file(filepath)
+
+    def train_directory(self, dirpath: str) -> int:
+        if hasattr(self._backend, "train_directory"):
+            return self._backend.train_directory(dirpath)
+        
+        # Fallback for backends that don't implement train_directory
+        total = 0
+        for filename in sorted(os.listdir(dirpath)):
+            if filename.endswith(".txt"):
+                filepath = os.path.join(dirpath, filename)
+                count = self.train_file(filepath)
+                total += count
+        return total
+
+    def generate(self, prompt: str, max_length: int = 50, temperature: float = 0.7) -> str:
+        return self._backend.generate(prompt, max_length, temperature)
+
+    def predict_next(self, context: str, num_candidates: int = 5) -> List[Tuple[str, float]]:
+        return self._backend.predict_next(context, num_candidates)
+
+    def save_model(self, path: str) -> bool:
+        return self._backend.save_model(path)
+
+    def load_model(self, path: str) -> bool:
+        return self._backend.load_model(path)
+
+    def vocab_size(self) -> int:
+        return self._backend.vocab_size()
+
+    def total_tokens(self) -> int:
+        return self._backend.total_tokens() if callable(getattr(self._backend, "total_tokens", None)) else self._backend.total_tokens
+
+    def top_vocab(self, n: int = 20) -> List[Tuple[str, int]]:
+        if hasattr(self._backend, "top_vocab"):
+            return self._backend.top_vocab(n)
+        return []
+
+    def reset(self):
+        self._backend.reset()
+
+    @property
+    def is_trained(self) -> bool:
+        if hasattr(self._backend, "is_trained"):
+            return self._backend.is_trained
+        return self.vocab_size() > 0
