@@ -51,7 +51,7 @@ Trigrams (3-word sequences):
   world is beautiful → 1
 ```
 
-### How Generation Works
+### How Generation Works fjrghr
 
 When you give SLM a prompt like `"the world is"`, it:
 
