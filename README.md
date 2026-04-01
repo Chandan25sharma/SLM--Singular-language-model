@@ -18,7 +18,7 @@ SLM is a **Singular Language Model** — a lightweight AI that runs 100% on your
 
 **You feed it text → It learns word patterns → It generates new text.**
 
-That's it. No magic. No black box. Pure statistics.
+That's it. No magic. No black box. Pure statistics.fhrs
 
 ---
 
