@@ -22,7 +22,7 @@ That's it. No magic. No black box. Pure statistics.
 
 ---
 
-## How It Works
+## How It Works and who we can use it 
 
 ### The Core Idea: N-Gram Frequency Analysis
 
