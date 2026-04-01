@@ -8,7 +8,7 @@
 # SLM — Singular Language Model
 
 > **The Free World's AI** — A fully offline, frequency-based language model.
-> No internet. No cloud. No APIs. No GPU. Just local intelligence.
+>fae No internet. No cloud. No APIs. No GPU. Just local intelligence.
 
 ---
 
