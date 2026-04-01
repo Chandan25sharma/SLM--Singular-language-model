@@ -391,4 +391,8 @@ chmod +x build.sh && ./build.sh
 ## Version
 
 **SLM v1.0.0** — Singular Language Model  
+
+Co-authored-by: Chandan Sharma <mrchandansharma25@gmail.com>
+
+
 Offline · Frequency-Based · Free · Open
