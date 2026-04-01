@@ -1,17 +1,4 @@
-"""
-SLM Gemini Helper — Uses Google Gemini API to generate training corpus text.
 
-This does NOT replace the SLM engine. The SLM is always offline and frequency-based.
-Gemini is used ONLY to generate diverse, high-quality training text that is then
-saved to corpus files and used to train the local SLM model.
-
-Usage flow:
-  1. User provides Gemini API key (slm config set gemini_api_key <key>)
-  2. User runs: slm corpus expand --topic "science" --sentences 200
-  3. Gemini generates text on that topic
-  4. Text is saved to corpus/<topic>.txt
-  5. User trains SLM on the new file: slm train corpus/<topic>.txt
-"""
 
 import os
 import sys
