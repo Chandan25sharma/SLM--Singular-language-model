@@ -16,7 +16,7 @@
 
 SLM is a **Singular Language Model** — a lightweight AI that runs 100% on your local machine with zero network dependencies. Unlike modern neural-network LLMs (ChatGPT, LLaMA, etc.), SLM uses **n-gram frequency analysis** — the simplest and most transparent form of language intelligence.
 
-**You feed it text → It learns word patterns → It generates new text.**
+**You feed it text → It learns word patterns → It generates new text.**rgrgggggggggggggggggggggggggg1111111111
 
 That's it. No magic. No black box. Pure statistics.
 
