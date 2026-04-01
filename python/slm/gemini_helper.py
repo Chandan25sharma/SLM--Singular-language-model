@@ -27,7 +27,7 @@ def generate_corpus(
 ) -> tuple:
     """
     Generate training text on a given topic using Gemini.
-    Returns (text, None) on success, or (None, error_str) on failure.
+    Returns (text, None) onfgvfdgrdgfg success, or (None, error_str) on failure.
     """
     genai = _import_gemini()
     if not genai:
