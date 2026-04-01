@@ -413,6 +413,7 @@ def cmd_help(engine: SLMEngine, trainer: SLMTrainer, args: List[str]):
         "Training":   ["quickstart", "train", "train-text"],
         "Generation": ["generate", "chat", "predict"],
         "Model":      ["save", "load", "reset", "info", "vocab"],
+        "Admin":      ["config", "corpus"],
         "Other":      ["help", "version"],
     }
 

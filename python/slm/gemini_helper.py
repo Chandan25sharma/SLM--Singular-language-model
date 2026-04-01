@@ -23,7 +23,7 @@ def generate_corpus(
     api_key: str,
     topic: str,
     num_sentences: int = 100,
-    model_name: str = "gemini-2.0-flash",
+    model_name: str = "gemini-3-flash",
 ) -> tuple:
     """
     Generate training text on a given topic using Gemini.
@@ -61,7 +61,7 @@ def expand_corpus(
     topic: str,
     output_dir: str = "corpus",
     num_sentences: int = 150,
-    model_name: str = "gemini-2.0-flash",
+    model_name: str = "gemini-3-flash",
 ) -> tuple:
     """
     Generate corpus text and save it to a file in output_dir.

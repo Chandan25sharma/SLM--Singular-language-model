@@ -23,7 +23,7 @@ _ENV_FILE    = os.path.join(_ROOT, ".env")
 
 _DEFAULTS = {
     "version":            "1.0.0",
-    "gemini_model":       "gemini-2.0-flash",
+    "gemini_model":       "gemini-3-flash",
     "default_model_path": "models/default.slm",
     "default_temp":       0.7,
     "default_length":     50,
