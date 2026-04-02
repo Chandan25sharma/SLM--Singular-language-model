@@ -53,7 +53,7 @@ Trigrams (3-word sequences):
 
 ### How Generation Works fjrghr
 
-When you give SLM a prompt like `"the world is"`, it:
+When you give SLM a prompt like `"the world is"`, it: fds
 
 1. **Looks up trigrams** — finds `"the world is"` → next word could be `vast` (50%) or `beautiful` (50%)
 2. **If no trigram match** — falls back to bigrams: looks at `"world is"` → same result
