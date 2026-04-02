@@ -6,7 +6,8 @@
 # ╚══════╝╚══════╝╚═╝     ╚═╝
 
 # SLM — Singular Language Model
-
+Co-authored-by: Chandan Sharma <mrchandansharma25@gmail.com>
+Co-authored-by: Chandan Sharma <mrchandansharma26@gmail.com>
 > **The Free World's AI** — A fully offline, frequency-based language model.
 >fae No internet. No cloud. No APIs. No GPU. Just local intelligence.
 
@@ -391,9 +392,5 @@ chmod +x build.sh && ./build.sh
 ## Version
 
 **SLM v1.0.0** — Singular Language Model  
-
-Co-authored-by: Chandan Sharma <mrchandansharma25@gmail.com>
-Co-authored-by: Chandan Sharma <mrchandansharma26@gmail.com>
-
 
 Offline · Frequency-Based · Free · Open
