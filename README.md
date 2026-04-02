@@ -16,7 +16,7 @@
 
 SLM is a **Singular Language Model** — a lightweight AI that runs 100% on your local machine with zero network dependencies. Unlike modern neural-network LLMs (ChatGPT, LLaMA, etc.), SLM uses **n-gram frequency analysis** — the simplest and most transparent form of language intelligence.
 
-**You feed it text → It learns word patterns → It generates new text.**
+You feed it text → It learns word patterns → It generates new text.
 
 That's it. No magic. No black box. Pure statistics.fhrs
 
@@ -55,11 +55,11 @@ Trigrams (3-word sequences):
 
 When you give SLM a prompt like `"the world is"`, it:
 
-1. **Looks up trigrams** — finds `"the world is"` → next word could be `vast` (50%) or `beautiful` (50%)
-2. **If no trigram match** — falls back to bigrams: looks at `"world is"` → same result
-3. **If no bigram match** — falls back to unigrams: picks from most common words
-4. **Temperature sampling** — controls randomness (low = predictable, high = creative)
-5. **Repeats** — chains predictions to build full sentences
+1. Looks up trigrams** — finds `"the world is"` → next word could be `vast` (50%) or `beautiful` (50%)
+2. If no trigram match** — falls back to bigrams: looks at `"world is"` → same result
+3. If no bigram match** — falls back to unigrams: picks from most common words
+4. Temperature sampling** — controls randomness (low = predictable, high = creative)
+5. Repeats** — chains predictions to build full sentences
 
 ### The Pipeline
 
@@ -166,7 +166,7 @@ Show the top next-word predictions with probability bars.
 slm > predict "the"
   Next word predictions for "the":
 
-   1. world               █████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0.1200
+   1. world               █████████████░███░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0.1200
    2. most                ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0.0800
    3. power               ██████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0.0600
    4. way                 █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0.0500
