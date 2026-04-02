@@ -7,7 +7,7 @@
 
 # SLM — Singular Language Model
 Co-authored-by: Chandan Sharma <mrchandansharma25@gmail.com>
-Co-authored-by: Chandan Sharma <mrchandansharma26@gmail.com>
+Co-authored-by: seed al-mahroos <almahroosapp@gmail.com>
 > **The Free World's AI** — A fully offline, frequency-based language model.
 >fae No internet. No cloud. No APIs. No GPU. Just local intelligence.
 
